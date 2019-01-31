@@ -48,10 +48,9 @@ class Statistics(object):
                                                                                self.ml3_ratio, self.ml5_ratio)
 
     def print_stats(self):
-        stats.get_ratio()
+        self.get_ratio()
         print "\n"
         print "-" * 49
-        print " %s" % name + "'s Statistics"
         print " " * 9 + "-", "Total Rounds", "-      Match length     - "
         print " " * 8, "-              -   1   -   3   -   5   - "
         print "-" * 49
@@ -65,6 +64,7 @@ class Statistics(object):
                                                                           (self.ml5_played - self.ml5_wins))
         print "Ties     -       %d      -------------------------" % self.tie_score
         self.print_win_line()
+        print "-" * 49
 
     def increment_ml1_played(self):
         self.ml1_played += 1

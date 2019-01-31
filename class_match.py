@@ -17,7 +17,7 @@ class Match(object):
         self.round_no += 1
 
     def print_match_score(self):
-        print "%s" % name, self.match_user_score, ":", self.match_comp_score, "Computer"
+        print "You", self.match_user_score, ":", self.match_comp_score, "Computer"
 
 
     def check_match_is_won(self):
