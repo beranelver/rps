@@ -1,3 +1,5 @@
+import sqlite3
+
 class Statistics(object):
     def __init__(self, game_no, user_score, comp_score, tie_score, win_ratio, ml1_played, ml1_wins, ml3_played,
                  ml3_wins, ml5_played, ml5_wins, ml1_ratio, ml3_ratio, ml5_ratio):
@@ -141,3 +143,19 @@ class Statistics(object):
                 self.increment_ml5_wins()
             else:
                 self.increment_ml5_played()
+
+
+    def print_overall_stats(self):
+        db = sqlite3.connect('rps_database.db')
+        d = db.cursor()
+        d.execute('SELECT * FROM rps_stats')
+        print "\n"
+        print "-" * 49
+        print " " * 9 + "-", "Total Rounds", "-      Match length     - "
+        print " " * 8, "-              -   1   -   3   -   5   - "
+        print "-" * 49
+        for row in d:
+            print ("{0}".format(row[0], row[1], row[2], row[3], row[4]) +
+                   (" " * (9 - len("{0}".format(row[0], row[1], row[2], row[3], row[4])))
+                    +"-       {1}      -   {2}   -   {3}   -   {4}   - ".format(row[0],
+                                                                                row[1], row[2], row[3], row[4])))

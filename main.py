@@ -7,6 +7,7 @@ from time import sleep
 import sys
 import class_match
 import class_statistics
+import sqlite3
 
 GREET_MSG = "Welcome to Rock, Paper, Scissors!"
 WIN_MSG = "You win!"
@@ -130,7 +131,7 @@ while player_wants_to_continue:
     elif print_stats == "T":
         stats.print_stats()
     elif print_stats == "O":
-        print "I'm not clever enough to do that yet. Come back next week!"
+        stats.print_overall_stats()
 
     again = raw_input("Would you like to play again? Y/N: ").upper()
 
