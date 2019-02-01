@@ -125,13 +125,11 @@ player_wants_to_continue = True
 while player_wants_to_continue:
     play()
 
-    print_stats = raw_input("Show statistics for [T]his session, [O]verall or [N]ot at all? ").upper()
-    if print_stats not in "TON" or len(print_stats) != 1:
+    print_stats = raw_input("Show statistics for this session? Y/N: ").upper()
+    if print_stats not in "YN" or len(print_stats) != 1:
         print "I'll take that as a no!"
-    elif print_stats == "T":
+    elif print_stats == "Y":
         stats.print_stats()
-    elif print_stats == "O":
-        stats.print_overall_stats()
 
     again = raw_input("Would you like to play again? Y/N: ").upper()
 
@@ -139,6 +137,6 @@ while player_wants_to_continue:
         again = raw_input("I didn't catch that. Please enter Y for yes or N for no: ").upper()
 
     if again == "N":
-        print "Thanks for playing, %s. Here are your final statistics for today: " % name
-        stats.print_stats()
+        print "Thanks for playing, %s. Here are your overall statistics:" % name
+        stats.print_overall_stats()
         player_wants_to_continue = False

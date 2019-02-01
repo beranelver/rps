@@ -159,3 +159,6 @@ class Statistics(object):
                    (" " * (9 - len("{0}".format(row[0], row[1], row[2], row[3], row[4])))
                     +"-       {1}      -   {2}   -   {3}   -   {4}   - ".format(row[0],
                                                                                 row[1], row[2], row[3], row[4])))
+        print "-" * 49
+        db.close()
+        
