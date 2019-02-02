@@ -145,6 +145,51 @@ class Statistics(object):
                 self.increment_ml5_played()
 
 
+    def increment_overall_stats(self):
+        played = (self.game_no, self.ml1_played, self.ml3_played, self.ml5_played)
+        wins = (self.user_score, self.ml1_wins, self.ml3_wins, self.ml5_wins)
+        losses = (self.comp_score, (self.ml1_played - self.ml1_wins), (self.ml3_played - self.ml3_wins),
+                 (self.ml5_played - self.ml5_wins))
+        ties = (self.game_no - self.user_score - self.comp_score, 0, 0, 0)
+        win_percent = (self.win_ratio, self.ml1_ratio, self.ml3_ratio, self.ml5_ratio)
+        db = sqlite3.connect('rps_database.db')
+        d = db.cursor()
+        d.execute('''UPDATE rps_stats '''
+                  '''SET 'Total Rounds' = 'Total Rounds' + ?,''' 
+                  ''' 'Best of 1' = 'Best of 1' + ?,'''
+                  ''' 'Best of 3' = 'Best of 3' + ?,''' 
+                  ''' 'Best of 5' = 'Best of 5' + ?''' 
+                  ''' WHERE Stat = 'Played' ''', played)
+        d.execute('''UPDATE rps_stats '''
+                  '''SET 'Total Rounds' = 'Total Rounds' + ?,'''
+                  ''' 'Best of 1' = 'Best of 1' + ?,'''
+                  ''' 'Best of 3' = 'Best of 3' + ?,'''
+                  ''' 'Best of 5' = 'Best of 5' + ?'''
+                  ''' WHERE Stat = 'Wins' ''', wins)
+        d.execute('''UPDATE rps_stats '''
+                  '''SET 'Total Rounds' = 'Total Rounds' + ?,'''
+                  ''' 'Best of 1' = 'Best of 1' + ?,'''
+                  ''' 'Best of 3' = 'Best of 3' + ?,'''
+                  ''' 'Best of 5' = 'Best of 5' + ?'''
+                  ''' WHERE Stat = 'Losses' ''', losses)
+        d.execute('''UPDATE rps_stats '''
+                  '''SET 'Total Rounds' = 'Total Rounds' + ?,'''
+                  ''' 'Best of 1' = 'Best of 1' + ?,'''
+                  ''' 'Best of 3' = 'Best of 3' + ?,'''
+                  ''' 'Best of 5' = 'Best of 5' + ?'''
+                  ''' WHERE Stat = 'Ties' ''', ties)
+        d.execute('''UPDATE rps_stats '''
+                  '''SET 'Total Rounds' = ?,'''
+                  ''' 'Best of 1' = ?,'''
+                  ''' 'Best of 3' = ?,'''
+                  ''' 'Best of 5' = ?'''
+                  ''' WHERE Stat = 'Win %' ''', win_percent)
+        db.commit()
+        db.close()
+
+
+
+
     def print_overall_stats(self):
         db = sqlite3.connect('rps_database.db')
         d = db.cursor()
@@ -155,10 +200,6 @@ class Statistics(object):
         print " " * 8, "-              -   1   -   3   -   5   - "
         print "-" * 49
         for row in d:
-            print ("{0}".format(row[0], row[1], row[2], row[3], row[4]) +
-                   (" " * (9 - len("{0}".format(row[0], row[1], row[2], row[3], row[4])))
-                    +"-       {1}      -   {2}   -   {3}   -   {4}   - ".format(row[0],
-                                                                                row[1], row[2], row[3], row[4])))
+            print ("{0:9}-      {1}       -   {2}   -   {3}   -   {4}   -".format(row[0], row[1], row[2], row[3], row[4]))
         print "-" * 49
         db.close()
-        

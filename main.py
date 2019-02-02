@@ -137,6 +137,7 @@ while player_wants_to_continue:
         again = raw_input("I didn't catch that. Please enter Y for yes or N for no: ").upper()
 
     if again == "N":
+        stats.increment_overall_stats()
         print "Thanks for playing, %s. Here are your overall statistics:" % name
         stats.print_overall_stats()
         player_wants_to_continue = False
