@@ -19,7 +19,7 @@ def slow_type(string):
     for char in string[::1]:
         sys.stdout.write(char)
         sys.stdout.flush()
-        sleep(uniform(0.2, 0.3))
+        sleep(uniform(0.05, 0.1))
 
 
 def get_winner(user, comp):
@@ -110,6 +110,20 @@ def play():
         print "Aw, you lost this match"
 
 
+def create_table():
+    db = sqlite3.connect("rps_database.db")
+    d = db.cursor()
+    d.execute("CREATE TABLE IF NOT EXISTS rps_stats (Stat text PRIMARY KEY, total_rounds integer, best_of_1 integer, best_of_3 integer, best_of_5 integer")
+    add_row = "INSERT INTO rps_stats (Stat, total_rounds, best_of_1, best_of_3, best_of_5) VALUES (?, ?, ?, ?, ?)"
+    d.execute(add_row, ('Played', 0, 0, 0, 0))
+    d.execute(add_row, ('Wins', 0, 0, 0, 0))
+    d.execute(add_row, ('Losses', 0, 0, 0, 0))
+    d.execute(add_row, ('Ties', 0, 0, 0, 0))
+    d.execute(add_row, ('Win %', 0, 0, 0, 0))
+    db.commit()
+    db.close()
+
+
 stats = class_statistics.Statistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 """------------stuff starts displaying from here-------------"""
@@ -137,6 +151,7 @@ while player_wants_to_continue:
         again = raw_input("I didn't catch that. Please enter Y for yes or N for no: ").upper()
 
     if again == "N":
+        """create_table()"""
         stats.increment_overall_stats()
         print "Thanks for playing, %s. Here are your overall statistics:" % name
         stats.print_overall_stats()
