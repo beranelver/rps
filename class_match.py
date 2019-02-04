@@ -1,5 +1,6 @@
 class Match(object):
-    def __init__(self, length, round_no, match_user_score, match_comp_score):
+    def __init__(self, session_id, round_no, match_user_score, match_comp_score, length):
+        self.session_id = session_id
         self.length = length
         self.round_no = round_no
         self.match_user_score = match_user_score
@@ -18,7 +19,6 @@ class Match(object):
 
     def print_match_score(self):
         print "You", self.match_user_score, ":", self.match_comp_score, "Computer"
-
 
     def check_match_is_won(self):
         if self.length == 1:

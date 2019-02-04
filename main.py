@@ -6,7 +6,8 @@ from random import uniform
 from time import sleep
 import sys
 import class_match
-import class_statistics
+#import class_statistics
+import class_statistics_storage
 import sqlite3
 
 GREET_MSG = "Welcome to Rock, Paper, Scissors!"
@@ -52,7 +53,6 @@ def choose_match_length():
             continue
         if length not in valid_lengths:
             print "That's not an option!"
-            continue
         else:
             break
     return length
@@ -98,11 +98,13 @@ def play_match(match):
 
 def play():
     length = choose_match_length()
+    session_id = get_session_id()
 
-    match = class_match.Match(length, 0, 0, 0)
+    match = class_match.Match(session_id, 0, 0, 0, length)
+
     play_match(match)
 
-    stats.add_match(match)
+    statistics_storage.write_stats(match)
 
     if match.did_user_win():
         print "You won this match!"
@@ -110,26 +112,42 @@ def play():
         print "Aw, you lost this match"
 
 
-def create_table():
+def create_tables():
     db = sqlite3.connect("rps_database.db")
     d = db.cursor()
-    d.execute("CREATE TABLE IF NOT EXISTS rps_stats (Stat text PRIMARY KEY, total_rounds integer, best_of_1 integer, best_of_3 integer, best_of_5 integer")
-    add_row = "INSERT INTO rps_stats (Stat, total_rounds, best_of_1, best_of_3, best_of_5) VALUES (?, ?, ?, ?, ?)"
-    d.execute(add_row, ('Played', 0, 0, 0, 0))
-    d.execute(add_row, ('Wins', 0, 0, 0, 0))
-    d.execute(add_row, ('Losses', 0, 0, 0, 0))
-    d.execute(add_row, ('Ties', 0, 0, 0, 0))
-    d.execute(add_row, ('Win %', 0, 0, 0, 0))
+    d.execute("CREATE TABLE IF NOT EXISTS matches (match_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER, "
+              "round_count INTEGER, win_count INTEGER, loss_count INTEGER, length INTEGER)")
+    d.execute("CREATE TABLE IF NOT EXISTS sessions (session_id INTEGER PRIMARY KEY AUTOINCREMENT, player_name TEXT, "
+              "date_time TEXT)")
     db.commit()
     db.close()
 
 
-stats = class_statistics.Statistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+def create_session(name):
+    db = sqlite3.connect("rps_database.db")
+    d = db.cursor()
+    d.execute("INSERT INTO sessions (player_name, date_time) VALUES (?, datetime())", (name,))
+    db.commit()
+    db.close()
 
-"""------------stuff starts displaying from here-------------"""
+
+def get_session_id():
+    db = sqlite3.connect("rps_database.db")
+    d = db.cursor()
+    d.execute("SELECT session_id FROM sessions ORDER BY date_time DESC LIMIT 1")
+    session_id = d.fetchone()[0]
+    db.close()
+    return session_id
+
+#------------stuff starts happening here-------------
+
+statistics_storage = class_statistics_storage.StatisticsStorage()
+create_tables()
 
 print GREET_MSG
 name = raw_input("What's your name? ").capitalize()
+create_session(name)
+
 print "Alright, %s, you know how it works, right? Rock beats scissors, scissors beat paper, paper beats rock. Let's" \
        " see if you've got what it takes to beat the computer!" % name
 sleep(0)
@@ -143,7 +161,7 @@ while player_wants_to_continue:
     if print_stats not in "YN" or len(print_stats) != 1:
         print "I'll take that as a no!"
     elif print_stats == "Y":
-        stats.print_stats()
+        print statistics_storage.get_session_stats(get_session_id())
 
     again = raw_input("Would you like to play again? Y/N: ").upper()
 
@@ -151,8 +169,6 @@ while player_wants_to_continue:
         again = raw_input("I didn't catch that. Please enter Y for yes or N for no: ").upper()
 
     if again == "N":
-        """create_table()"""
-        stats.increment_overall_stats()
         print "Thanks for playing, %s. Here are your overall statistics:" % name
-        stats.print_overall_stats()
+        #statistics_storage.get_session_stats(session_id)
         player_wants_to_continue = False
