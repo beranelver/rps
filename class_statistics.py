@@ -1,4 +1,5 @@
-import sqlite3
+from __future__ import division
+
 
 class Statistics(object):
     def __init__(self, game_no, user_score, comp_score, tie_score, win_ratio, ml1_played, ml1_wins, ml3_played,
@@ -18,16 +19,16 @@ class Statistics(object):
         self.ml3_ratio = ml3_ratio
         self.ml5_ratio = ml5_ratio
 
-    def increment_game_no(self):
-        self.game_no += 1
-
     def increment_user_win(self):
+        self.game_no += 1
         self.user_score += 1
 
     def increment_comp_win(self):
+        self.game_no += 1
         self.comp_score += 1
 
     def increment_tie(self):
+        self.game_no += 1
         self.tie_score += 1
 
     def get_ratio(self):
@@ -114,9 +115,6 @@ class Statistics(object):
             self.ml5_ratio = (self.ml5_wins / self.ml5_played) * 100
 
     def add_match(self, match):
-        for _ in range(match.round_no):
-            self.increment_game_no()
-
         for _ in range(match.match_user_score):
             self.increment_user_win()
 
@@ -143,63 +141,3 @@ class Statistics(object):
                 self.increment_ml5_wins()
             else:
                 self.increment_ml5_played()
-
-
-    def increment_overall_stats(self):
-        played = (self.game_no, self.ml1_played, self.ml3_played, self.ml5_played)
-        wins = (self.user_score, self.ml1_wins, self.ml3_wins, self.ml5_wins)
-        losses = (self.comp_score, (self.ml1_played - self.ml1_wins), (self.ml3_played - self.ml3_wins),
-                 (self.ml5_played - self.ml5_wins))
-        ties = (self.game_no - self.user_score - self.comp_score, 0, 0, 0)
-        win_percent = (self.win_ratio, self.ml1_ratio, self.ml3_ratio, self.ml5_ratio)
-        db = sqlite3.connect('rps_database.db')
-        d = db.cursor()
-        d.execute('''UPDATE rps_stats '''
-                  '''SET 'Total Rounds' = 'Total Rounds' + ?,''' 
-                  ''' 'Best of 1' = 'Best of 1' + ?,'''
-                  ''' 'Best of 3' = 'Best of 3' + ?,''' 
-                  ''' 'Best of 5' = 'Best of 5' + ?''' 
-                  ''' WHERE Stat = 'Played' ''', played)
-        d.execute('''UPDATE rps_stats '''
-                  '''SET 'Total Rounds' = 'Total Rounds' + ?,'''
-                  ''' 'Best of 1' = 'Best of 1' + ?,'''
-                  ''' 'Best of 3' = 'Best of 3' + ?,'''
-                  ''' 'Best of 5' = 'Best of 5' + ?'''
-                  ''' WHERE Stat = 'Wins' ''', wins)
-        d.execute('''UPDATE rps_stats '''
-                  '''SET 'Total Rounds' = 'Total Rounds' + ?,'''
-                  ''' 'Best of 1' = 'Best of 1' + ?,'''
-                  ''' 'Best of 3' = 'Best of 3' + ?,'''
-                  ''' 'Best of 5' = 'Best of 5' + ?'''
-                  ''' WHERE Stat = 'Losses' ''', losses)
-        d.execute('''UPDATE rps_stats '''
-                  '''SET 'Total Rounds' = 'Total Rounds' + ?,'''
-                  ''' 'Best of 1' = 'Best of 1' + ?,'''
-                  ''' 'Best of 3' = 'Best of 3' + ?,'''
-                  ''' 'Best of 5' = 'Best of 5' + ?'''
-                  ''' WHERE Stat = 'Ties' ''', ties)
-        d.execute('''UPDATE rps_stats '''
-                  '''SET 'Total Rounds' = ?,'''
-                  ''' 'Best of 1' = ?,'''
-                  ''' 'Best of 3' = ?,'''
-                  ''' 'Best of 5' = ?'''
-                  ''' WHERE Stat = 'Win %' ''', win_percent)
-        db.commit()
-        db.close()
-
-
-
-
-    def print_overall_stats(self):
-        db = sqlite3.connect('rps_database.db')
-        d = db.cursor()
-        d.execute('SELECT * FROM rps_stats')
-        print "\n"
-        print "-" * 49
-        print " " * 9 + "-", "Total Rounds", "-      Match length     - "
-        print " " * 8, "-              -   1   -   3   -   5   - "
-        print "-" * 49
-        for row in d:
-            print ("{0:9}-      {1}       -   {2}   -   {3}   -   {4}   -".format(row[0], row[1], row[2], row[3], row[4]))
-        print "-" * 49
-        db.close()
