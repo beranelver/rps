@@ -8,6 +8,8 @@ import sys
 import class_match
 #import class_statistics
 import class_statistics_storage
+import class_statistics_fetch
+#import class_session
 import sqlite3
 
 GREET_MSG = "Welcome to Rock, Paper, Scissors!"
@@ -60,7 +62,7 @@ def choose_match_length():
 
 def play_match(match):
     while not match.check_match_is_won():
-        print "ROUND %d" % (match.round_no + 1)
+        print "ROUND %d" % (match.round_count + 1)
 
         user_guess = raw_input("Guess [R]ock, [P]aper or [S]cissors: ").upper()
         while user_guess not in "RPS" or len(user_guess) != 1:
@@ -85,11 +87,11 @@ def play_match(match):
         sleep(0)
 
         if result == WIN_MSG:
-            match.increment_match_user_score()
+            match.increment_win_count()
         elif result == LOSE_MSG:
-            match.increment_match_comp_score()
+            match.increment_loss_count()
         elif result == TIE_MSG:
-            match.increment_round_no()
+            match.increment_round_count()
 
         match.print_match_score()
 
@@ -99,7 +101,7 @@ def play_match(match):
 def play():
     length = choose_match_length()
     session_id = get_session_id()
-
+    print "Session ID: %d" % session_id
     match = class_match.Match(session_id, 0, 0, 0, length)
 
     play_match(match)
@@ -139,9 +141,36 @@ def get_session_id():
     db.close()
     return session_id
 
+def print_statistics(stats):
+    print "\n"
+    print "-" * 49
+    print " " * 9 + "-", "Total Rounds ", "-      Match length     - "
+    print " " * 8, "-               -   1   -   3   -   5   - "
+    print "-" * 49
+    print "Played   -       %d     -   %d   -   %d   -   %d   - " % (stats.get("total_rounds"),
+                                                                      stats.get("ml1_count"),
+                                                                      stats.get("ml3_count"),
+                                                                      stats.get("ml5_count"))
+    print "Wins     -       %d      -   %d   -   %d   -   %d   -" % (stats.get("total_wins"),
+                                                                      stats.get("ml1_wins"),
+                                                                      stats.get("ml3_wins"),
+                                                                      stats.get("ml5_wins"))
+    print "Losses   -       %d      -   %d   -   %d   -   %d   - " % (stats.get("total_losses"),
+                                                                      stats.get("ml1_losses"),
+                                                                      stats.get("ml3_losses"),
+                                                                      stats.get("ml5_losses"))
+    print "Ties     -       %d      -------------------------" % stats.get("total_ties")
+    print "Win %", "   -       %d      -   %d  -   %d  -   %d  -" % (stats.get("win_percent"),
+                                                                      stats.get("ml1_win_percent"),
+                                                                      stats.get("ml3_win_percent"),
+                                                                      stats.get("ml5_win_percent"))
+
 #------------stuff starts happening here-------------
 
 statistics_storage = class_statistics_storage.StatisticsStorage()
+
+statistics_fetch = class_statistics_fetch.StatisticsFetch()
+
 create_tables()
 
 print GREET_MSG
@@ -161,7 +190,7 @@ while player_wants_to_continue:
     if print_stats not in "YN" or len(print_stats) != 1:
         print "I'll take that as a no!"
     elif print_stats == "Y":
-        print statistics_storage.get_session_stats(get_session_id())
+        print_statistics(statistics_fetch.get_session_stats(get_session_id()))
 
     again = raw_input("Would you like to play again? Y/N: ").upper()
 
@@ -170,5 +199,5 @@ while player_wants_to_continue:
 
     if again == "N":
         print "Thanks for playing, %s. Here are your overall statistics:" % name
-        #statistics_storage.get_session_stats(session_id)
+        print_statistics(statistics_fetch.get_overall_stats())
         player_wants_to_continue = False
