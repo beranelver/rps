@@ -19,7 +19,6 @@ class Match(object):
     def print_match_score(self):
         print "You", self.match_user_score, ":", self.match_comp_score, "Computer"
 
-
     def check_match_is_won(self):
         if self.length == 1:
             if self.match_user_score == 1 or self.match_comp_score == 1:
